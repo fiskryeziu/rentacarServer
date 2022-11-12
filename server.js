@@ -22,6 +22,10 @@ app.use(cors())
 app.use(json())
 app.use('/uploads', express.static('uploads'))
 
+app.get('/', (req, res) => {
+  res.send('api is running')
+})
+
 //routes
 app.use('/api/user', userRoute)
 app.use('/api/cars', carRoute)
