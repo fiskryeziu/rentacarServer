@@ -2,23 +2,17 @@ import path from 'path'
 import express from 'express'
 import multer from 'multer'
 const router = express.Router()
-import { v4 as uuidv4 } from 'uuid'
+import { s3Uploadv2 } from '../middlewares/s3Service.js'
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, './uploads')
-  },
-  filename: (req, file, cb) => {
-    const fileName = file.originalname.toLowerCase().split(' ').join('-')
-    cb(null, uuidv4() + '-' + fileName)
-  },
-})
+const storage = multer.memoryStorage()
+
 const upload = multer({
-  storage: storage,
+  storage,
   fileFilter: (req, file, cb) => {
     if (
       file.mimetype == 'image/png' ||
       file.mimetype == 'image/jpg' ||
+      file.mimetype == 'image/webp' ||
       file.mimetype == 'image/jpeg'
     ) {
       cb(null, true)
@@ -29,18 +23,30 @@ const upload = multer({
   },
 })
 
-router.post('/', upload.array('images', 5), (req, res) => {
-  // console.log(req.files[0])
-  function getPath() {
-    let path = []
-
-    const url = req.protocol + '://' + req.get('host')
-    for (let file of req.files) {
-      path.push(`${url}/uploads/${file.filename}`)
-    }
-    return path
+router.post('/', upload.array('images', 5), async (req, res) => {
+  try {
+    const results = await s3Uploadv2(req.files)
+    res.json(results)
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: 'Something went wrong',
+      error: error.message,
+    })
   }
-  res.send(getPath())
+})
+
+router.post('/update', upload.array('images', 5), async (req, res) => {
+  try {
+    const results = await s3Uploadv2(req.files)
+    res.json(results)
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: 'Something went wrong',
+      error: error.message,
+    })
+  }
 })
 
 export default router

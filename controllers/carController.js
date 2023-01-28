@@ -1,10 +1,11 @@
 import mongoose from 'mongoose'
+import { s3Delete } from '../middlewares/s3Service.js'
 import Car from '../models/carModel.js'
 
 const getCars = async (req, res) => {
   const rangeValue = +req.query.rangeValue || 0
   const pageNumber = +req.query.pageNumber || 1
-  const carLimit = 2
+  const carLimit = 6
   try {
     const cars = await Car.find({})
       .limit(carLimit)
@@ -55,6 +56,7 @@ const deleteCarById = async (req, res) => {
   try {
     const car = await Car.findById(id)
     if (car) {
+      s3Delete(car.images)
       await car.remove()
       res.status(200).json('Car deleted')
     }
@@ -62,7 +64,7 @@ const deleteCarById = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Something went wrong',
-      error: err.message,
+      error: error.message,
     })
   }
 }
@@ -83,28 +85,36 @@ const updateCarById = async (req, res) => {
   const car = await Car.findById(id)
 
   if (car) {
-    ;(car.name = name || car.name),
-      (car.brand = brand || car.brand),
-      (car.pricePerDay = pricePerDay || car.pricePerDay),
-      (car.transmission = transmission || car.transmission),
-      (car.yearModel = yearModel || car.yearModel),
-      (car.seatCapacity = seatCapacity || car.seatCapacity),
-      (car.fuelType = fuelType || car.fuelType),
-      (car.images = images || car.images)
+    s3Delete(car.images)
+    let urlImages = []
+    for (let index = 0; index < images.length; index++) {
+      const element = images[index].Location
+      urlImages.push(element)
+    }
+    if (urlImages.length > 0) {
+      ;(car.name = name || car.name),
+        (car.brand = brand || car.brand),
+        (car.pricePerDay = pricePerDay || car.pricePerDay),
+        (car.transmission = transmission || car.transmission),
+        (car.yearModel = yearModel || car.yearModel),
+        (car.seatCapacity = seatCapacity || car.seatCapacity),
+        (car.fuelType = fuelType || car.fuelType),
+        (car.images = urlImages || car.images)
 
-    const updatedCar = await car.save()
+      const updatedCar = await car.save()
 
-    res.json({
-      _id: updatedCar._id,
-      name: updatedCar.name,
-      brand: updatedCar.brand,
-      pricePerDay: updatedCar.pricePerDay,
-      transmission: updatedCar.transmission,
-      yearModel: updatedCar.yearModel,
-      seatCapacity: updatedCar.seatCapacity,
-      fuelType: updatedCar.fuelType,
-      images: updatedCar.images,
-    })
+      res.json({
+        _id: updatedCar._id,
+        name: updatedCar.name,
+        brand: updatedCar.brand,
+        pricePerDay: updatedCar.pricePerDay,
+        transmission: updatedCar.transmission,
+        yearModel: updatedCar.yearModel,
+        seatCapacity: updatedCar.seatCapacity,
+        fuelType: updatedCar.fuelType,
+        images: updatedCar.images,
+      })
+    }
   } else {
     res.status(404)
     throw new Error('Could not update user!')
@@ -122,21 +132,33 @@ const createCar = async (req, res) => {
     fuelType,
     images,
   } = req.body
-  const car = new Car({
-    user: req.user._id,
-    name,
-    brand,
-    pricePerDay,
-    transmission,
-    yearModel,
-    seatCapacity,
-    fuelType,
-    images,
-  })
+  let urlImages = []
+  for (let index = 0; index < images.length; index++) {
+    const element = images[index].Location
+    urlImages.push(element)
+  }
+  if (urlImages.length > 0) {
+    const car = new Car({
+      user: req.user._id,
+      name,
+      brand,
+      pricePerDay,
+      transmission,
+      yearModel,
+      seatCapacity,
+      fuelType,
+      images: urlImages,
+    })
 
-  const createdCar = await car.save()
-
-  res.status(201).json(createdCar)
+    const createdCar = await car.save()
+    res.status(201).json(createdCar)
+  } else {
+    res.status(400).json({
+      success: false,
+      message: 'Something went wrong',
+      error: 'Something went wrong',
+    })
+  }
 }
 
 export {
