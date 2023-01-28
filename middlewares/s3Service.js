@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 import { config } from 'dotenv'
 import AWS from 'aws-sdk'
+import { S3Client } from '@aws-sdk/client-s3'
 
 config()
 
@@ -16,6 +17,26 @@ export const s3Uploadv2 = async (files) => {
   })
 
   return await Promise.all(params.map((param) => s3.upload(param).promise()))
+}
+
+export const s3Uploadv3 = async (files) => {
+  let s3client = new S3Client({
+    region: process.env.MY_REGION,
+    credentials: {
+      accessKeyId: process.env.MY_AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.MY_AWS_SECRET_ACCESS_KEY,
+    },
+  })
+  const params = files.map((file) => {
+    return {
+      Bucket: process.env.BUCKET_NAME,
+      Key: `uploads/${uuidv4()}-${file.originalname}`,
+      Body: file.buffer,
+    }
+  })
+  return await Promise.all(
+    params.map((param) => s3client.send(new PutObjectCommand(param)))
+  )
 }
 
 export const s3Delete = async (images) => {

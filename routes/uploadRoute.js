@@ -2,7 +2,7 @@ import path from 'path'
 import express from 'express'
 import multer from 'multer'
 const router = express.Router()
-import { s3Uploadv2 } from '../middlewares/s3Service.js'
+import { s3Uploadv2, s3Uploadv3 } from '../middlewares/s3Service.js'
 
 const storage = multer.memoryStorage()
 
@@ -25,7 +25,7 @@ const upload = multer({
 
 router.post('/', upload.array('images', 5), async (req, res) => {
   try {
-    const results = await s3Uploadv2(req.files)
+    const results = await s3Uploadv3(req.files)
     res.json(results)
   } catch (error) {
     res.status(400).json({
