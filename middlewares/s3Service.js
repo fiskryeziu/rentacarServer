@@ -21,7 +21,7 @@ export const s3Uploadv2 = async (files) => {
 
 export const s3Uploadv3 = async (files) => {
   let s3client = new S3Client({
-    region: process.env.MY_REGION,
+    region: 'eu-central-1',
     credentials: {
       accessKeyId: process.env.MY_AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.MY_AWS_SECRET_ACCESS_KEY,
