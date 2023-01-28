@@ -9,7 +9,7 @@ export const s3Uploadv2 = async (files) => {
 
   const params = files.map((file) => {
     return {
-      Bucket: process.env.BUCKET_NAME,
+      Bucket: process.env.S3_BUCKET_NAME,
       Key: `uploads/${uuidv4()}-${file.originalname}`,
       Body: file.buffer,
     }
@@ -32,7 +32,7 @@ export const s3Delete = async (images) => {
       }
     })
     var params = {
-      Bucket: process.env.BUCKET_NAME,
+      Bucket: process.env.S3_BUCKET_NAME,
       Delete: {
         Objects: getKeys,
         Quiet: false,
