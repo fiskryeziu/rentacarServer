@@ -29,7 +29,7 @@ export const s3Uploadv3 = async (files) => {
   })
   const params = files.map((file) => {
     return {
-      Bucket: process.env.BUCKET_NAME,
+      Bucket: 'renta-car-sif-2022',
       Key: `uploads/${uuidv4()}-${file.originalname}`,
       Body: file.buffer,
     }
