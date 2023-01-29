@@ -2,7 +2,7 @@ import path from 'path'
 import express from 'express'
 import multer from 'multer'
 const router = express.Router()
-import { s3Uploadv2, s3Uploadv3 } from '../middlewares/s3Service.js'
+import { s3Uploadv2 } from '../middlewares/s3Service.js'
 
 const storage = multer.memoryStorage()
 

@@ -25,28 +25,35 @@ export const s3Uploadv2 = async (files) => {
   return await Promise.all(params.map((param) => s3.upload(param).promise()))
 }
 
-export const s3Uploadv3 = async (files) => {
-  let s3client = new S3Client({
+// export const s3Uploadv3 = async (files) => {
+//   let s3client = new S3Client({
+//     region: 'eu-central-1',
+//     credentials: {
+//       accessKeyId: process.env.MY_AWS_ACCESS_KEY_ID,
+//       secretAccessKey: process.env.MY_AWS_SECRET_ACCESS_KEY,
+//     },
+//   })
+//   const params = files.map((file) => {
+//     return {
+//       Bucket: 'renta-car-sif-2022',
+//       Key: `uploads/${uuidv4()}-${file.originalname}`,
+//       Body: file.buffer,
+//     }
+//   })
+//   return await Promise.all(
+//     params.map((param) => s3client.send(new PutObjectCommand(param)))
+//   )
+// }
+
+export const s3Delete = async (images) => {
+  // const s3 = new AWS.S3()
+  let s3 = new AWS.S3({
     region: 'eu-central-1',
     credentials: {
       accessKeyId: process.env.MY_AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.MY_AWS_SECRET_ACCESS_KEY,
     },
   })
-  const params = files.map((file) => {
-    return {
-      Bucket: 'renta-car-sif-2022',
-      Key: `uploads/${uuidv4()}-${file.originalname}`,
-      Body: file.buffer,
-    }
-  })
-  return await Promise.all(
-    params.map((param) => s3client.send(new PutObjectCommand(param)))
-  )
-}
-
-export const s3Delete = async (images) => {
-  const s3 = new AWS.S3()
   if (
     images &&
     images[0].startsWith(
@@ -59,7 +66,7 @@ export const s3Delete = async (images) => {
       }
     })
     var params = {
-      Bucket: process.env.S3_BUCKET_NAME,
+      Bucket: 'renta-car-sif-2022',
       Delete: {
         Objects: getKeys,
         Quiet: false,
