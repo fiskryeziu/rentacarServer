@@ -6,11 +6,17 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 config()
 
 export const s3Uploadv2 = async (files) => {
-  const s3 = new AWS.S3()
+  let s3 = new AWS.S3({
+    region: 'eu-central-1',
+    credentials: {
+      accessKeyId: process.env.MY_AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.MY_AWS_SECRET_ACCESS_KEY,
+    },
+  })
 
   const params = files.map((file) => {
     return {
-      Bucket: process.env.BUCKET_NAME,
+      Bucket: 'renta-car-sif-2022',
       Key: `uploads/${uuidv4()}-${file.originalname}`,
       Body: file.buffer,
     }

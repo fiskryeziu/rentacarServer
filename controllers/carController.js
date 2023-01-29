@@ -137,6 +137,8 @@ const createCar = async (req, res) => {
     const element = images[index].Location
     urlImages.push(element)
   }
+
+  console.log(urlImages)
   if (urlImages.length > 0) {
     const car = new Car({
       user: req.user._id,
